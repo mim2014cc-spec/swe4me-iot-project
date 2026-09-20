@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="5">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IoT Mechatronics Dashboard</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #f3f6f9;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      margin-top: 0;
+      color: #64748b;
+    }
+
+    .info {
+      background: #e0f2fe;
+      border-left: 5px solid #0284c7;
+      padding: 12px;
+      margin: 20px 0;
+      border-radius: 6px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .fan-on {
+      color: #dc2626;
+    }
+
+    .fan-off {
+      color: #16a34a;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th,
+    td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      background: #0f766e;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .empty {
+      padding: 24px;
+      background: white;
+      border-radius: 10px;
+      color: #64748b;
+    }
+
+    footer {
+      margin-top: 20px;
+      color: #64748b;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>IoT Mechatronics Dashboard</h1>
+    <p class="subtitle">
+      Smart Greenhouse Monitoring and Fan Control Simulation
+    </p>
+
+    <div class="info">
+      Dashboard จะรีเฟรชอัตโนมัติทุก 5 วินาที |
+      เกณฑ์เปิดพัดลม: อุณหภูมิ ≥ {{ threshold }}°C
+    </div>
+
+    {% if latest %}
+    <div class="cards">
+      <div class="card">
+        <div class="card-title">Device ID</div>
+        <div class="card-value">{{ latest["device_id"] }}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Temperature</div>
+        <div class="card-value">{{ "%.1f"|format(latest["temperature"]) }} °C</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Humidity</div>
+        <div class="card-value">{{ "%.1f"|format(latest["humidity"]) }} %</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fan Status</div>
+
+        {% if latest["fan_status"] == "ON" %}
+        <div class="card-value fan-on">ON</div>
+        {% else %}
+        <div class="card-value fan-off">OFF</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="card-title">Last Received</div>
+        <div class="card-value" style="font-size: 20px;">
+          {{ latest["received_at"] }}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty">
+      ยังไม่มีข้อมูลจาก ESP32 กรุณาเริ่ม Wokwi Simulation และตรวจสอบ MQTT topic
+    </div>
+    {% endif %}
+
+    <h2>ประวัติข้อมูลล่าสุด</h2>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>เวลา</th>
+            <th>อุปกรณ์</th>
+            <th>อุณหภูมิ (°C)</th>
+            <th>ความชื้น (%)</th>
+            <th>พัดลม</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in readings %}
+          <tr>
+            <td>{{ row["id"] }}</td>
+            <td>{{ row["received_at"] }}</td>
+            <td>{{ row["device_id"] }}</td>
+            <td>{{ "%.1f"|format(row["temperature"]) }}</td>
+            <td>{{ "%.1f"|format(row["humidity"]) }}</td>
+            <td>{{ row["fan_status"] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      ESP32 (Wokwi) → HiveMQ MQTT Broker → Python Flask → SQLite Database → Dashboard
+    </footer>
+  </div>
+</body>
+</html>
