@@ -1,85 +1,72 @@
 import sqlite3
-from datetime import datetime
+import datetime
 
-DB_NAME = "iot_data.db"
-
-
-def get_connection():
-    """Create a SQLite database connection."""
-    connection = sqlite3.connect(DB_NAME)
-    connection.row_factory = sqlite3.Row
-    return connection
-
+DB_NAME = "pool.db"
 
 def init_db():
-    """Create table if it does not exist."""
-    connection = get_connection()
-
-    connection.execute("""
-        CREATE TABLE IF NOT EXISTS sensor_readings (
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pool_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            device_id TEXT NOT NULL,
-            temperature REAL NOT NULL,
-            humidity REAL NOT NULL,
-            fan_status TEXT NOT NULL,
-            received_at TEXT NOT NULL
+            timestamp TEXT,
+            ph REAL,
+            temperature REAL,
+            turbidity REAL,
+            water_level TEXT,
+            pump_fill TEXT,
+            pump_dose TEXT
         )
     """)
+    conn.commit()
+    conn.close()
 
-    connection.commit()
-    connection.close()
+def insert_record(ph, temperature, turbidity, water_level, pump_fill, pump_dose):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("""
+        INSERT INTO pool_records (timestamp, ph, temperature, turbidity, water_level, pump_fill, pump_dose)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (now, ph, temperature, turbidity, water_level, pump_fill, pump_dose))
+    conn.commit()
+    conn.close()
 
+def get_latest_record():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, timestamp, ph, temperature, turbidity, water_level, pump_fill, pump_dose FROM pool_records ORDER BY id DESC LIMIT 1")
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "id": row[0],
+            "timestamp": row[1],
+            "ph": row[2],
+            "temperature": row[3],
+            "turbidity": row[4],
+            "water_level": row[5],
+            "pump_fill": row[6],
+            "pump_dose": row[7]
+        }
+    return None
 
-def save_sensor_reading(device_id, temperature, humidity, fan_status):
-    """Save an incoming sensor reading."""
-    connection = get_connection()
-
-    connection.execute("""
-        INSERT INTO sensor_readings (
-            device_id,
-            temperature,
-            humidity,
-            fan_status,
-            received_at
-        )
-        VALUES (?, ?, ?, ?, ?)
-    """, (
-        device_id,
-        temperature,
-        humidity,
-        fan_status,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    ))
-
-    connection.commit()
-    connection.close()
-
-
-def get_latest_reading():
-    """Get the newest sensor reading."""
-    connection = get_connection()
-
-    row = connection.execute("""
-        SELECT *
-        FROM sensor_readings
-        ORDER BY id DESC
-        LIMIT 1
-    """).fetchone()
-
-    connection.close()
-    return row
-
-
-def get_recent_readings(limit=20):
-    """Get recent readings for dashboard table."""
-    connection = get_connection()
-
-    rows = connection.execute("""
-        SELECT *
-        FROM sensor_readings
-        ORDER BY id DESC
-        LIMIT ?
-    """, (limit,)).fetchall()
-
-    connection.close()
-    return rows
+def get_history_records(limit=10):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, timestamp, ph, temperature, turbidity, water_level, pump_fill, pump_dose FROM pool_records ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    result = []
+    for row in rows:
+        result.append({
+            "id": row[0],
+            "timestamp": row[1],
+            "ph": row[2],
+            "temperature": row[3],
+            "turbidity": row[4],
+            "water_level": row[5],
+            "pump_fill": row[6],
+            "pump_dose": row[7]
+        })
+    return result

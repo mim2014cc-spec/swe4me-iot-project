@@ -2,207 +2,394 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="5">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IoT Mechatronics Dashboard</title>
-
+  <title>IoT Mechatronics Dashboard - Smart Pool System</title>
   <style>
     * {
       box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
-
     body {
+      background-color: #f8fafc;
+      color: #1e293b;
       margin: 0;
-      padding: 24px;
-      font-family: Arial, sans-serif;
-      background: #f3f6f9;
-      color: #1f2937;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
     }
-
     .container {
-      max-width: 1100px;
-      margin: auto;
+      width: 100%;
+      max-width: 1000px;
     }
-
     h1 {
-      margin-bottom: 6px;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      color: #0f172a;
     }
-
     .subtitle {
-      margin-top: 0;
+      font-size: 15px;
       color: #64748b;
+      margin: 0 0 20px 0;
     }
-
-    .info {
-      background: #e0f2fe;
-      border-left: 5px solid #0284c7;
-      padding: 12px;
-      margin: 20px 0;
-      border-radius: 6px;
+    .info-banner {
+      background-color: #e0f2fe;
+      border-left: 4px solid #0284c7;
+      padding: 12px 18px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #0369a1;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
       gap: 16px;
-      margin-bottom: 24px;
+      background: white;
+      padding: 14px 20px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
+    .status-item {
+      display: flex;
+      align-items: center;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #334155;
+    }
+    .led {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+    .led-green { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .led-red { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; animation: blink 1s infinite alternate; }
+    .led-yellow { background-color: #eab308; box-shadow: 0 0 8px #eab308; }
+    .led-gray { background-color: #94a3b8; }
+    @keyframes blink { from { opacity: 1; } to { opacity: 0.3; } }
 
+    .data-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 25px;
+    }
     .card {
       background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 18px 20px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-
     .card-title {
+      font-size: 13px;
       color: #64748b;
-      font-size: 14px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
-
     .card-value {
-      font-size: 32px;
-      font-weight: bold;
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
     }
-
-    .fan-on {
-      color: #dc2626;
+    .card-unit {
+      font-size: 14px;
+      color: #94a3b8;
+      font-weight: 400;
+      margin-left: 4px;
     }
-
-    .fan-off {
-      color: #16a34a;
+    .card-desc {
+      font-size: 12px;
+      margin-top: 6px;
+      font-weight: 500;
     }
+    .btn-group {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary { background: #0f766e; color: white; }
+    .btn-secondary { background: #64748b; color: white; }
+    button:hover { opacity: 0.9; }
 
-    .table-container {
-      overflow-x: auto;
+    .table-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 30px 0 12px 0;
+    }
+    .table-wrapper {
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 700px;
+      text-align: left;
+      font-size: 14px;
     }
-
-    th,
+    th {
+      background-color: #0f766e;
+      color: white;
+      padding: 12px 16px;
+      font-weight: 600;
+    }
     td {
       padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
     }
-
-    th {
-      background: #0f766e;
-      color: white;
-    }
-
-    tr:hover {
-      background: #f8fafc;
-    }
-
-    .empty {
-      padding: 24px;
-      background: white;
-      border-radius: 10px;
-      color: #64748b;
-    }
-
-    footer {
-      margin-top: 20px;
-      color: #64748b;
-      font-size: 14px;
+    tr:last-child td { border-bottom: none; }
+    .footer-flow {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #94a3b8;
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1>IoT Mechatronics Dashboard</h1>
-    <p class="subtitle">
-      Smart Greenhouse Monitoring and Fan Control Simulation
-    </p>
 
-    <div class="info">
-      Dashboard จะรีเฟรชอัตโนมัติทุก 5 วินาที |
-      เกณฑ์เปิดพัดลม: อุณหภูมิ ≥ {{ threshold }}°C
+<div class="container">
+  <h1>IoT Mechatronics Dashboard</h1>
+  <p class="subtitle">Smart Pool Monitoring and Closed-loop Control Simulation (220V AC)</p>
+
+  <div class="info-banner">
+    <div>
+      <strong>Dashboard อัปเดตทุก 2 วินาที</strong> | เกณฑ์ค่า pH ปลอดภัย: 7.2 - 7.6 | ระบบความปลอดภัย: Anti-Dry Run
     </div>
-
-    {% if latest %}
-    <div class="cards">
-      <div class="card">
-        <div class="card-title">Device ID</div>
-        <div class="card-value">{{ latest["device_id"] }}</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Temperature</div>
-        <div class="card-value">{{ "%.1f"|format(latest["temperature"]) }} °C</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Humidity</div>
-        <div class="card-value">{{ "%.1f"|format(latest["humidity"]) }} %</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Fan Status</div>
-
-        {% if latest["fan_status"] == "ON" %}
-        <div class="card-value fan-on">ON</div>
-        {% else %}
-        <div class="card-value fan-off">OFF</div>
-        {% endif %}
-      </div>
-
-      <div class="card">
-        <div class="card-title">Last Received</div>
-        <div class="card-value" style="font-size: 20px;">
-          {{ latest["received_at"] }}
-        </div>
-      </div>
-    </div>
-    {% else %}
-    <div class="empty">
-      ยังไม่มีข้อมูลจาก ESP32 กรุณาเริ่ม Wokwi Simulation และตรวจสอบ MQTT topic
-    </div>
-    {% endif %}
-
-    <h2>ประวัติข้อมูลล่าสุด</h2>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>เวลา</th>
-            <th>อุปกรณ์</th>
-            <th>อุณหภูมิ (°C)</th>
-            <th>ความชื้น (%)</th>
-            <th>พัดลม</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for row in readings %}
-          <tr>
-            <td>{{ row["id"] }}</td>
-            <td>{{ row["received_at"] }}</td>
-            <td>{{ row["device_id"] }}</td>
-            <td>{{ "%.1f"|format(row["temperature"]) }}</td>
-            <td>{{ "%.1f"|format(row["humidity"]) }}</td>
-            <td>{{ row["fan_status"] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <footer>
-      ESP32 (Wokwi) → HiveMQ MQTT Broker → Python Flask → SQLite Database → Dashboard
-    </footer>
+    <div style="font-size: 12px; opacity: 0.9;" id="last-update">-</div>
   </div>
+
+  <!-- สถานะไฟ LED แสดงผลตามความจริง -->
+  <div class="status-bar">
+    <div class="status-item">
+      <span id="led-conn" class="led led-gray"></span>
+      <span>ESP32: <strong id="txt-conn">รอสัญญาณเซนเซอร์...</strong></span>
+    </div>
+    <div class="status-item">
+      <span id="led-water" class="led led-gray"></span>
+      <span>ระดับน้ำ: <strong id="txt-water">-</strong></span>
+    </div>
+    <div class="status-item">
+      <span id="led-ph" class="led led-gray"></span>
+      <span>สถานะ pH: <strong id="txt-ph">-</strong></span>
+    </div>
+    <div class="status-item">
+      <span id="led-fill" class="led led-gray"></span>
+      <span>ปั๊มเติมน้ำ: <strong id="txt-fill">-</strong></span>
+    </div>
+    <div class="status-item">
+      <span id="led-dose" class="led led-gray"></span>
+      <span>ปั๊มโดสกรด: <strong id="txt-dose">-</strong></span>
+    </div>
+  </div>
+
+  <div class="data-cards">
+    <div class="card">
+      <div class="card-title">ค่าความเป็นกรด-ด่าง (pH)</div>
+      <div class="card-value"><span id="ph-val">-</span><span class="card-unit">pH</span></div>
+      <div class="card-desc" id="ph-desc" style="color: #64748b;">รอข้อมูลจากหัววัด pH</div>
+    </div>
+    <div class="card">
+      <div class="card-title">อุณหภูมิน้ำสระ</div>
+      <div class="card-value"><span id="temp-val">-</span><span class="card-unit">°C</span></div>
+      <div class="card-desc" id="temp-desc" style="color: #64748b;">รอข้อมูลจาก DS18B20</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ความขุ่นของน้ำ</div>
+      <div class="card-value"><span id="turbidity-val">-</span><span class="card-unit">NTU</span></div>
+      <div class="card-desc" id="turbidity-desc" style="color: #64748b;">รอข้อมูลจากเซนเซอร์ความขุ่น</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ระบบความปลอดภัย Anti-Dry Run</div>
+      <div class="card-value" id="safety-title" style="font-size: 20px; color: #64748b; margin-top: 4px;">รอเชื่อมต่อ</div>
+      <div class="card-desc" id="safety-desc" style="color: #64748b;">ยังไม่มีสัญญาณจากสวิตช์ลูกลอย</div>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn-primary" onclick="sendPumpCommand('ON')">สั่งเปิดปั๊มเติมน้ำ (Manual Fill)</button>
+    <button class="btn-secondary" onclick="sendPumpCommand('OFF')">สั่งหยุดปั๊มเติมน้ำ (Stop Fill)</button>
+  </div>
+
+  <div class="table-title">ประวัติข้อมูลล่าสุด (เฉพาะที่ได้รับจากบอร์ดจริง)</div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>เวลา</th>
+          <th>อุปกรณ์</th>
+          <th>pH</th>
+          <th>อุณหภูมิ (°C)</th>
+          <th>ความขุ่น (NTU)</th>
+          <th>ระดับน้ำ</th>
+          <th>ปั๊มเติมน้ำ</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr>
+          <td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">
+            ยังไม่มีข้อมูลจาก ESP32 กรุณาเริ่มรัน Wokwi Simulation
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-flow">
+    ESP32 (Wokwi) → HiveMQ MQTT Broker → Python Flask → SQLite Database → Dashboard
+  </div>
+</div>
+
+<script>
+  async function updateDashboard() {
+    try {
+      const res = await fetch('/api/data');
+      const data = await res.json();
+
+      // กรณีที่ 1: เซิร์ฟเวอร์เปิดอยู่ แต่ยังไม่มี ESP32 ส่งข้อมูลเข้ามา
+      if (!data.connected) {
+        document.getElementById('led-conn').className = 'led led-gray';
+        document.getElementById('txt-conn').innerText = 'รอสัญญาณเซนเซอร์...';
+        return;
+      }
+
+      // กรณีที่ 2: ได้รับข้อมูลจาก ESP32 / เซนเซอร์เรียบร้อยแล้ว
+      document.getElementById('led-conn').className = 'led led-green';
+      document.getElementById('txt-conn').innerText = 'เชื่อมต่อแล้ว (Online)';
+
+      const ph = parseFloat(data.ph).toFixed(2);
+      document.getElementById('ph-val').innerText = ph;
+      document.getElementById('temp-val').innerText = parseFloat(data.temperature).toFixed(1);
+      document.getElementById('turbidity-val').innerText = parseFloat(data.turbidity).toFixed(1);
+      document.getElementById('last-update').innerText = 'อัปเดตล่าสุด: ' + data.timestamp;
+
+      // สถานะ pH
+      const ledPh = document.getElementById('led-ph');
+      const txtPh = document.getElementById('txt-ph');
+      const phDesc = document.getElementById('ph-desc');
+
+      if (ph < 7.2) {
+        ledPh.className = 'led led-yellow';
+        txtPh.innerText = 'น้ำเป็นกรด (< 7.2)';
+        phDesc.innerText = 'น้ำมีสภาพเป็นกรดต่ำกว่าเกณฑ์';
+        phDesc.style.color = '#eab308';
+      } else if (ph > 7.6) {
+        ledPh.className = 'led led-red';
+        txtPh.innerText = 'น้ำเป็นด่าง (> 7.6)';
+        phDesc.innerText = 'สั่งเปิดปั๊มโดสกรดปรับค่าน้ำ';
+        phDesc.style.color = '#ef4444';
+      } else {
+        ledPh.className = 'led led-green';
+        txtPh.innerText = 'ช่วงปลอดภัย (7.2 - 7.6)';
+        phDesc.innerText = 'ค่าปกติมาตรฐาน';
+        phDesc.style.color = '#16a34a';
+      }
+
+      // สถานะระดับน้ำ & Anti-Dry Run
+      const ledWater = document.getElementById('led-water');
+      const txtWater = document.getElementById('txt-water');
+      const safetyTitle = document.getElementById('safety-title');
+      const safetyDesc = document.getElementById('safety-desc');
+
+      if (data.water_level === 'DRY') {
+        ledWater.className = 'led led-red';
+        txtWater.innerText = 'น้ำแห้งวิกฤต (DRY)';
+        safetyTitle.innerText = 'ตัดไฟฉุกเฉิน!';
+        safetyTitle.style.color = '#ef4444';
+        safetyDesc.innerText = 'Anti-Dry Run ทำงาน บังคับตัดกระแสไฟปั๊มทันที';
+        safetyDesc.style.color = '#ef4444';
+      } else {
+        ledWater.className = 'led led-green';
+        txtWater.innerText = 'ปกติ (NORMAL)';
+        safetyTitle.innerText = 'ปลอดภัย';
+        safetyTitle.style.color = '#16a34a';
+        safetyDesc.innerText = 'ลูกลอยตรวจพบระดับน้ำปกติ';
+        safetyDesc.style.color = '#16a34a';
+      }
+
+      // สถานะปั๊ม
+      const ledFill = document.getElementById('led-fill');
+      const txtFill = document.getElementById('txt-fill');
+      if (data.pump_fill === 'ON') {
+        ledFill.className = 'led led-green';
+        txtFill.innerText = 'ON (กำลังเติมน้ำ)';
+      } else {
+        ledFill.className = 'led led-gray';
+        txtFill.innerText = 'OFF';
+      }
+
+      const ledDose = document.getElementById('led-dose');
+      const txtDose = document.getElementById('txt-dose');
+      if (data.pump_dose === 'ON') {
+        ledDose.className = 'led led-yellow';
+        txtDose.innerText = 'DOSING (จ่ายกรด)';
+      } else {
+        ledDose.className = 'led led-gray';
+        txtDose.innerText = 'OFF';
+      }
+
+      updateHistory();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('led-conn').className = 'led led-red';
+      document.getElementById('txt-conn').innerText = 'ออฟไลน์ (Server หลุด)';
+    }
+  }
+
+  async function updateHistory() {
+    try {
+      const res = await fetch('/api/history');
+      const records = await res.json();
+      const tbody = document.getElementById('table-body');
+      if (!records || records.length === 0) return;
+
+      tbody.innerHTML = records.map(r => `
+        <tr>
+          <td>#${r.id}</td>
+          <td>${r.timestamp}</td>
+          <td>esp32_pool</td>
+          <td><strong>${parseFloat(r.ph).toFixed(2)}</strong></td>
+          <td>${parseFloat(r.temperature).toFixed(1)}</td>
+          <td>${parseFloat(r.turbidity).toFixed(1)}</td>
+          <td><span style="font-weight:600; color:${r.water_level === 'DRY' ? '#ef4444' : '#16a34a'}">${r.water_level}</span></td>
+          <td>${r.pump_fill}</td>
+        </tr>
+      `).join('');
+    } catch (e) { console.error(e); }
+  }
+
+  async function sendPumpCommand(action) {
+    await fetch('/api/pump', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: action })
+    });
+    setTimeout(updateDashboard, 500);
+  }
+
+  setInterval(updateDashboard, 2000);
+  updateDashboard();
+</script>
 </body>
 </html>
